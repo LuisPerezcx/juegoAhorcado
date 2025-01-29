@@ -2,137 +2,139 @@ package cliente;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.*;
-import java.net.Socket;
+import java.net.*;
 
-public class UIAhorcado extends JFrame {
-    private JLabel palabraLabel;
-    private JLabel intentosLabel;
-    private JTextField letraInput;
-    private JButton enviarBtn;
-    private JTextArea logArea;
-    private AhorcadoPanel ahorcadoPanel;
+public class UIAhorcado {
+    private static final String HOST = "localhost";
+    private static final int PUERTO = 5000;
 
     private Socket socket;
     private BufferedReader entrada;
     private PrintWriter salida;
+    private int intentosRestantes;
+
+    private JFrame ventana;
+    private JTextField campoLetra;
+    private JButton btnEnviar;
+    private JTextArea areaMensajes;
+    private JPanel panelDibujo;
 
     public UIAhorcado() {
-        setTitle("Ahorcado Multijugador 🎮");
-        setSize(500, 400);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-
-        // Panel Superior (Palabra + Intentos)
-        JPanel topPanel = new JPanel();
-        palabraLabel = new JLabel("_ _ _ _ _");
-        palabraLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        intentosLabel = new JLabel("Intentos restantes: 6");
-        topPanel.add(palabraLabel);
-        topPanel.add(intentosLabel);
-
-        // Panel Central (Dibujo Ahorcado)
-        ahorcadoPanel = new AhorcadoPanel();
-
-        // Panel Inferior (Entrada Usuario)
-        JPanel bottomPanel = new JPanel();
-        letraInput = new JTextField(5);
-        enviarBtn = new JButton("Enviar");
-        bottomPanel.add(new JLabel("Ingresa una letra:"));
-        bottomPanel.add(letraInput);
-        bottomPanel.add(enviarBtn);
-
-        // Área de Log
-        logArea = new JTextArea(6, 40);
-        logArea.setEditable(false);
-        JScrollPane scroll = new JScrollPane(logArea);
-
-        add(topPanel, BorderLayout.NORTH);
-        add(ahorcadoPanel, BorderLayout.CENTER);
-        add(scroll, BorderLayout.EAST);
-        add(bottomPanel, BorderLayout.SOUTH);
-
-        // Conectar con el Servidor
-        conectarServidor();
-
-        // Evento del Botón
-        enviarBtn.addActionListener(e -> enviarLetra());
-    }
-
-    private void conectarServidor() {
         try {
-            socket = new Socket("localhost", 12345);
+            // Establecer conexión al servidor
+            socket = new Socket(HOST, PUERTO);
             entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             salida = new PrintWriter(socket.getOutputStream(), true);
+            intentosRestantes = 6; // Número inicial de intentos.
 
-            new Thread(() -> {
-                try {
-                    String mensaje;
-                    while ((mensaje = entrada.readLine()) != null) {
-                        manejarMensaje(mensaje);
-                    }
-                } catch (IOException e) {
-                    logArea.append("❌ Error de conexión\n");
+            // Crear la interfaz gráfica
+            ventana = new JFrame("Ahorcado");
+            ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            ventana.setSize(500, 400);  // Aumenta el tamaño de la ventana
+            ventana.setLayout(new BorderLayout());
+
+            // Panel para mostrar el dibujo del ahorcado
+            panelDibujo = new JPanel() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    dibujarAhorcado(g);
                 }
-            }).start();
+            };
+            panelDibujo.setPreferredSize(new Dimension(200, 300));  // Ajuste del tamaño del panel
+            ventana.add(panelDibujo, BorderLayout.WEST);
+
+            areaMensajes = new JTextArea(10, 30);
+            areaMensajes.setEditable(false);
+            JScrollPane scrollPane = new JScrollPane(areaMensajes);
+            ventana.add(scrollPane, BorderLayout.CENTER);
+
+            JPanel panel = new JPanel();
+            campoLetra = new JTextField(2);
+            btnEnviar = new JButton("Enviar Letra");
+            panel.add(campoLetra);
+            panel.add(btnEnviar);
+            ventana.add(panel, BorderLayout.SOUTH);
+
+            // Configurar evento del botón
+            btnEnviar.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String letra = campoLetra.getText().trim();
+                    if (!letra.isEmpty()) {
+                        enviarLetra(letra);
+                        campoLetra.setText("");  // Limpiar el campo
+                    }
+                }
+            });
+
+            // Hilo para escuchar respuestas del servidor
+            Thread escucharRespuestas = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    escucharServidor();
+                }
+            });
+            escucharRespuestas.start();
+
+            // Mostrar ventana
+            ventana.setVisible(true);
 
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "No se pudo conectar al servidor", "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }
 
-    private void manejarMensaje(String mensaje) {
-        SwingUtilities.invokeLater(() -> {
-            if (mensaje.startsWith("Palabra:")) {
-                palabraLabel.setText(mensaje.substring(9));
-            } else if (mensaje.startsWith("Intentos:")) {
-                intentosLabel.setText("Intentos restantes: " + mensaje.substring(9));
-                ahorcadoPanel.actualizarDibujo(Integer.parseInt(mensaje.substring(9)));
-            } else if (mensaje.startsWith("Log:")) {
-                logArea.append(mensaje.substring(5) + "\n");
-            } else if (mensaje.startsWith("FIN")) {
-                JOptionPane.showMessageDialog(this, mensaje.substring(4), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-    }
-
-    private void enviarLetra() {
-        String letra = letraInput.getText().trim();
-        if (!letra.isEmpty() && letra.length() == 1) {
+    private void enviarLetra(String letra) {
+        try {
             salida.println(letra);
-            letraInput.setText("");
+            areaMensajes.append("Letra enviada: " + letra + "\n");
+        } catch (Exception e) {
+            areaMensajes.append("Error al enviar la letra: " + e.getMessage() + "\n");
         }
     }
 
-    class AhorcadoPanel extends JPanel {
-        private int intentosRestantes = 6;
+    private void escucharServidor() {
+        String mensaje;
+        try {
+            while ((mensaje = entrada.readLine()) != null) {
+                areaMensajes.append(mensaje + "\n");
 
-        public void actualizarDibujo(int intentos) {
-            this.intentosRestantes = intentos;
-            repaint();
+                // Aquí procesas la solicitud del servidor para pedir la letra
+                if (mensaje.startsWith("Ingresa una letra:")) {
+                    campoLetra.setEditable(true);  // Permitir la entrada
+                    btnEnviar.setEnabled(true);
+                }
+
+                // Procesar si el intento falló (ejemplo de recibo del error)
+                if (mensaje.contains("fallo")) {
+                    intentosRestantes--;
+                    panelDibujo.repaint();  // Redibujar la figura con el nuevo número de intentos
+                }
+            }
+        } catch (IOException e) {
+            areaMensajes.append("Error de comunicación con el servidor.\n");
         }
+    }
 
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.setColor(Color.BLACK);
-            g.drawLine(50, 250, 200, 250); // Base
-            g.drawLine(125, 50, 125, 250); // Poste
-            g.drawLine(125, 50, 200, 50);  // Soporte
-            g.drawLine(200, 50, 200, 75);  // Cuerda
+    private void dibujarAhorcado(Graphics g) {
+        g.setColor(Color.BLACK);
+        g.drawLine(30, 150, 150, 150);  // Base
+        g.drawLine(75, 20, 75, 150);   // Poste
+        g.drawLine(75, 20, 150, 20);   // Soporte
+        g.drawLine(150, 20, 150, 40);  // Cuerda
 
-            if (intentosRestantes <= 5) g.drawOval(175, 75, 50, 50); // Cabeza
-            if (intentosRestantes <= 4) g.drawLine(200, 125, 200, 180); // Cuerpo
-            if (intentosRestantes <= 3) g.drawLine(200, 140, 170, 170); // Brazo izq
-            if (intentosRestantes <= 2) g.drawLine(200, 140, 230, 170); // Brazo der
-            if (intentosRestantes <= 1) g.drawLine(200, 180, 170, 220); // Pierna izq
-            if (intentosRestantes == 0) g.drawLine(200, 180, 230, 220); // Pierna der
-        }
+        if (intentosRestantes <= 5) g.drawOval(130, 40, 40, 40);  // Cabeza
+        if (intentosRestantes <= 4) g.drawLine(150, 80, 150, 130); // Cuerpo
+        if (intentosRestantes <= 3) g.drawLine(150, 95, 120, 120); // Brazo izq
+        if (intentosRestantes <= 2) g.drawLine(150, 95, 180, 120); // Brazo der
+        if (intentosRestantes <= 1) g.drawLine(150, 130, 120, 160); // Pierna izq
+        if (intentosRestantes == 0) g.drawLine(150, 130, 180, 160); // Pierna der
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new UIAhorcado().setVisible(true));
+        new UIAhorcado();
     }
 }

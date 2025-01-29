@@ -5,7 +5,7 @@ import java.net.*;
 import java.util.concurrent.*;
 
 public class ServidorAhorcado {
-    private static final int PUERTO = 12345;
+    private static final int PUERTO = 5000;
     private static ExecutorService pool = Executors.newFixedThreadPool(10);
 
     public static void main(String[] args) {

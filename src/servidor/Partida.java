@@ -1,6 +1,5 @@
 package servidor;
 
-import java.util.*;
 
 public class Partida {
     private String palabra;
@@ -8,8 +7,8 @@ public class Partida {
     private int intentos;
     private static final int MAX_INTENTOS = 6;
 
-    public Partida() {
-        this.palabra = Palabras.obtenerPalabraAleatoria();
+    public Partida(String palabra) {
+        this.palabra = palabra;
         this.palabraOculta = new StringBuilder("_".repeat(palabra.length()));
         this.intentos = MAX_INTENTOS;
     }

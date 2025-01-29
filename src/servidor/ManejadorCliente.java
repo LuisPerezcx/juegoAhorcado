@@ -7,9 +7,9 @@ public class ManejadorCliente implements Runnable {
     private Socket socket;
     private Partida partida;
 
-    public ManejadorCliente(Socket socket) {
+    public ManejadorCliente(Socket socket, String palabra) {
         this.socket = socket;
-        this.partida = new Partida();
+        this.partida = new Partida(palabra);
     }
 
     @Override
@@ -20,7 +20,7 @@ public class ManejadorCliente implements Runnable {
             salida.println("🎮 Bienvenido al Ahorcado. Adivina la palabra.");
 
             while (!partida.juegoTerminado()) {
-                salida.println("🔤 Palabra: " + partida.getPalabraOculta());
+                salida.println("Palabra: " + partida.getPalabraOculta());
                 salida.println("Intentos restantes: " + partida.getIntentosRestantes());
                 salida.println("Ingresa una letra:");
 

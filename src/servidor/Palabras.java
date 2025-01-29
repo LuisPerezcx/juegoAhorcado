@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 public class Palabras {
-    private static final String ARCHIVO = "palabras.txt";
+    private static final String ARCHIVO = "src/palabras.txt";
     private static List<String> listaPalabras = new ArrayList<>();
 
     static {

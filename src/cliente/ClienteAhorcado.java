@@ -5,7 +5,7 @@ import java.net.*;
 
 public class ClienteAhorcado {
     private static final String HOST = "localhost";
-    private static final int PUERTO = 12345;
+    private static final int PUERTO = 5000;
 
     public static void main(String[] args) {
         try (Socket socket = new Socket(HOST, PUERTO);

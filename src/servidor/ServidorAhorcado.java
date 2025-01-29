@@ -15,7 +15,7 @@ public class ServidorAhorcado {
             while (true) {
                 Socket cliente = serverSocket.accept();
                 System.out.println("🔹 Nuevo jugador conectado: " + cliente.getInetAddress());
-                //pool.execute(new ManejadorCliente(cliente));
+                pool.execute(new ManejadorCliente(cliente));
             }
         } catch (IOException e) {
             e.printStackTrace();

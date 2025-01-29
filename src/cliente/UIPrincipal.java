@@ -105,10 +105,12 @@ class ControllerBtns implements ActionListener{
         if(e == ui.btnCrear){
             System.out.println("crear juego!");
             String palabra = JOptionPane.showInputDialog("ingresa una palabra para juagar",null);
-            if(palabra != null){
+            if(palabra != null && !palabra.isEmpty()){
                 ServidorAhorcado.iniciarServidor(palabra);
                 ui.dispose();
                 new UIAhorcado("localhost",true);
+            }else{
+                JOptionPane.showMessageDialog(null, "Debes ingresar una palabra válida", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else if(e == ui.btnUnirse){
             String ipAdress = JOptionPane.showInputDialog("Ingresa la ip del host",null);

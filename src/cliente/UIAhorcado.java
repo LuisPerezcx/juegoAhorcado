@@ -31,7 +31,7 @@ public class UIAhorcado extends JFrame {
         this.ipAddress = ipAddress;
         this.esHost = esHost;
 
-        setTitle("Ahorcado Multijugador 🎮");
+        setTitle("Ahorcado Multijugador 🎮 - " + (esHost ? "Host" : "Jugador"));
         setSize(300, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -42,20 +42,15 @@ public class UIAhorcado extends JFrame {
         add(bottomPanel, BorderLayout.SOUTH);
 
         if(esHost){
-            letraInput.setVisible(false);
-            enviarBtn.setVisible(false);
+            bottomPanel.setVisible(false);
+            conectarServidor(ipAddress);
         } else {
             enviarBtn.addActionListener(e -> enviarLetra());
+            conectarServidor(ipAddress);
         }
 
         setVisible(true);
         setLocationRelativeTo(null);
-
-        if(!esHost){
-            conectarServidor(ipAddress);
-        } else {
-            mostrarEsperandoMensaje();
-        }
     }
 
     private void construirVentana(){
@@ -87,18 +82,12 @@ public class UIAhorcado extends JFrame {
         bottomPanel.add(enviarBtn);
     }
 
-    private void mostrarEsperandoMensaje() {
-        while (!otroJugador){
-            JOptionPane.showMessageDialog(null, "Esperando a que el otro jugador se una...\nip: "+obtenerIPLocal(), "Esperando", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
 
 
     private void conectarServidor(String ipAddress) {
         try {
             socket = new Socket();
-            socket.connect(new InetSocketAddress(ipAddress, 5000),500);
-            socket.setSoTimeout(5000);
+            socket.connect(new InetSocketAddress(ipAddress, 5000),5000);
             entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             salida = new PrintWriter(socket.getOutputStream(), true);
 
@@ -108,8 +97,6 @@ public class UIAhorcado extends JFrame {
                     while ((mensaje = entrada.readLine()) != null) {
                         manejarMensaje(mensaje);
                     }
-                } catch (SocketTimeoutException e){
-                    JOptionPane.showMessageDialog(null, "Se agotó el tiempo de espera para recibir datos.", "Timeout", JOptionPane.WARNING_MESSAGE);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -123,9 +110,10 @@ public class UIAhorcado extends JFrame {
     }
 
     private void manejarMensaje(String mensaje) {
+        System.out.println(mensaje);
         SwingUtilities.invokeLater(() -> {
-            if(mensaje.contains("Jugador conectado")){
-                otroJugador = true;
+            if(mensaje.contains("Nuevo jugador conectado:")){
+                JOptionPane.showMessageDialog(this, "Un nuevo jugador se ha unido al juego.", "Jugador Unido", JOptionPane.INFORMATION_MESSAGE);
             }
             if (mensaje.startsWith("Palabra:")) {
                 String mensajeConEspacios = mensaje.substring(9);
@@ -133,7 +121,6 @@ public class UIAhorcado extends JFrame {
                 palabraLabel.setText(mensajeConEspaciosSeparados.trim());
             } else if (mensaje.contains("Intentos ")) {
                 int intentosRestantes =  Integer.parseInt(mensaje.substring(20));
-                System.out.println(intentosRestantes);
                 intentosLabel.setText("Intentos restantes: " + intentosRestantes);
                 ahorcadoPanel.actualizarDibujo(intentosRestantes);
             } else if (mensaje.contains("Juego terminado")) {
@@ -205,5 +192,9 @@ public class UIAhorcado extends JFrame {
         }
 
         return "No se pudo obtener la IP de la red local";
+    }
+
+    public static void main(String[] args) {
+        new UIAhorcado("localhost",false);
     }
 }

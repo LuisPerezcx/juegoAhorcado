@@ -72,6 +72,7 @@ public class UIAhorcado extends JFrame implements ServidorListener {
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         dialog.setVisible(true);
         dialog.toFront();
+        dialog.requestFocus();
         dialog.setResizable(false);
 
         // Usar un hilo separado para verificar cuando el jugador se conecta

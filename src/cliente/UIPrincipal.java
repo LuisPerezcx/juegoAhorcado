@@ -108,7 +108,7 @@ class ControllerBtns implements ActionListener{
             if(palabra != null && !palabra.isEmpty()){
                 ServidorAhorcado.iniciarServidor(palabra);
                 ui.dispose();
-                new UIAhorcado("localhost",true);
+                new UIAhorcado(true, null);
             }else{
                 JOptionPane.showMessageDialog(null, "Debes ingresar una palabra válida", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -116,7 +116,7 @@ class ControllerBtns implements ActionListener{
             String ipAdress = JOptionPane.showInputDialog("Ingresa la ip del host",null);
             if(ipAdress!= null){
                 ui.dispose();
-                new UIAhorcado(ipAdress,false);
+                new UIAhorcado(false, ipAdress);
             }
             System.out.println("unirse a juego!");
         }

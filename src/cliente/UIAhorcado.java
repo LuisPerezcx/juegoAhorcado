@@ -23,12 +23,9 @@ public class UIAhorcado extends JFrame {
     private BufferedReader entrada;
     private PrintWriter salida;
 
-    private boolean otroJugador = false;
-    private String ipAddress;
     private boolean esHost;
 
-    public UIAhorcado(String ipAddress, boolean esHost) {
-        this.ipAddress = ipAddress;
+    public UIAhorcado(boolean esHost, String ipAddress) {
         this.esHost = esHost;
 
         setTitle("Ahorcado Multijugador 🎮 - " + (esHost ? "Host" : "Jugador"));
@@ -43,10 +40,10 @@ public class UIAhorcado extends JFrame {
 
         if(esHost){
             bottomPanel.setVisible(false);
-            conectarServidor(ipAddress);
+            conectarServidor();
         } else {
             enviarBtn.addActionListener(e -> enviarLetra());
-            conectarServidor(ipAddress);
+            conectarCliente(ipAddress);
         }
 
         setVisible(true);
@@ -82,12 +79,33 @@ public class UIAhorcado extends JFrame {
         bottomPanel.add(enviarBtn);
     }
 
+    private void conectarCliente(String ipAddress){
+        ClienteAhorcado clienteAhorcado = new ClienteAhorcado(ipAddress);
+        new Thread(() -> {
+            try {
+                String mensaje;
+                // Simulamos la escucha de mensajes del servidor.
+                while ((mensaje = clienteAhorcado.entradaServidor.readLine()) != null) {
+                    // Procesamos el mensaje recibido, dependiendo del tipo.
+                    if (mensaje.contains("Palabra")) {
+                        //actualizarPalabra(mensaje);
+                    } else if (mensaje.contains("Intentos restantes")) {
+                        //actualizarIntentos(mensaje);
+                    } else if (mensaje.contains("Juego terminado")) {
+                        //finDelJuego(mensaje);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
 
 
-    private void conectarServidor(String ipAddress) {
+    private void conectarServidor() {
         try {
             socket = new Socket();
-            socket.connect(new InetSocketAddress(ipAddress, 5000),5000);
+            socket.connect(new InetSocketAddress("localhost", 5000),5000);
             entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             salida = new PrintWriter(socket.getOutputStream(), true);
 
@@ -192,9 +210,5 @@ public class UIAhorcado extends JFrame {
         }
 
         return "No se pudo obtener la IP de la red local";
-    }
-
-    public static void main(String[] args) {
-        new UIAhorcado("localhost",false);
     }
 }

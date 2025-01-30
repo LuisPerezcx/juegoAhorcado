@@ -3,7 +3,7 @@ import java.io.*;
 import java.net.*;
 
 public class ClienteAhorcado {
-    private static final String HOST = "localhost";
+    private static final String HOST = "172.25.3.50";
     private static final int PUERTO = 5000;
 
     public static void main(String[] args) {

@@ -43,6 +43,7 @@ public class ManejadorCliente implements Runnable {
                 } else {
                     enviarMensaje("💥 ¡Lo siento! Has perdido. La palabra era: " + partida.getPalabra());
                 }
+                enviarMensaje("Juego terminado");
             }
         } catch (IOException e) {
             enviarMensaje("❌ Error en el cliente: " + e.getMessage());

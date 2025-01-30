@@ -37,11 +37,12 @@ public class ManejadorCliente implements Runnable {
                     partida.intentarLetra(letra.charAt(0));
                 }
             }
-            // Verificar si el jugador ganó o perdió
-            if (partida.getPalabraOculta().equals(partida.getPalabra())) {
-                enviarMensaje("🎉 ¡Felicidades! Has adivinado la palabra: " + partida.getPalabra());
-            } else {
-                enviarMensaje("💥 ¡Lo siento! Has perdido. La palabra era: " + partida.getPalabra());
+            if(partida.juegoTerminado()){
+                if (partida.getPalabraOculta().equals(partida.getPalabra())) {
+                    enviarMensaje("🎉 ¡Felicidades! Has adivinado la palabra: " + partida.getPalabra());
+                } else {
+                    enviarMensaje("💥 ¡Lo siento! Has perdido. La palabra era: " + partida.getPalabra());
+                }
             }
         } catch (IOException e) {
             enviarMensaje("❌ Error en el cliente: " + e.getMessage());

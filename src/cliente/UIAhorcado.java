@@ -107,7 +107,7 @@ public class UIAhorcado extends JFrame implements ServidorListener {
     private void conectarCliente(String ipAddress){
         try {
             socket = new Socket();
-            socket.connect(new InetSocketAddress(ipAddress, 5000),500);
+            socket.connect(new InetSocketAddress(ipAddress, 5000),1000);
             entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             salida = new PrintWriter(socket.getOutputStream(), true);
 
@@ -149,6 +149,10 @@ public class UIAhorcado extends JFrame implements ServidorListener {
             } else if (mensaje.startsWith("Letra: ")){
                 String letra = mensaje.substring(7);
                 letraLabel.setText("Ultima letra intentada: " + letra);
+            } else if (mensaje.contains("¡Felicidades! Has adivinado la palabra:")){
+                JOptionPane.showMessageDialog(null,mensaje,"Ganaste!",JOptionPane.OK_OPTION);
+            } else if(mensaje.contains("¡Lo siento! Has perdido. La palabra era:")){
+                JOptionPane.showMessageDialog(null,mensaje,"Perdiste :(",JOptionPane.ERROR_MESSAGE);
             } else if (mensaje.contains("Juego terminado")) {
                 JOptionPane.showMessageDialog(null, mensaje, "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
                 int juegoNuevo = JOptionPane.showConfirmDialog(this, "Deseas jugar de nuevo?");

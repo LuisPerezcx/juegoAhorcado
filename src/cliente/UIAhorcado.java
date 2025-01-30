@@ -28,10 +28,11 @@ public class UIAhorcado extends JFrame implements ServidorListener {
 
     private boolean esHost;
     private boolean nuevoJugador = false;
+    private String palabra;
 
     public UIAhorcado(String palabra, boolean esHost, String ipAddress) {
         this.esHost = esHost;
-
+        this.palabra = palabra;
 
         setTitle("Ahorcado Multijugador 🎮 - " + (esHost ? "Host" : "Jugador"));
         setSize(300, 400);
@@ -73,6 +74,7 @@ public class UIAhorcado extends JFrame implements ServidorListener {
         topLabelPnl.add(palabraLabel);
         topLabelPnl.add(Box.createVerticalStrut(15));
         topLabelPnl.add(intentosLabel);
+        if(esHost) topLabelPnl.add(new JLabel("Palabra: "+palabra));
 
         topPanel.add(topLabelPnl);
 
@@ -86,6 +88,8 @@ public class UIAhorcado extends JFrame implements ServidorListener {
         letraLabel = new JLabel("");
 
         if(esHost){
+            letraLabel.setFont(new Font("Arial", Font.BOLD,20));
+            letraLabel.setForeground(Color.red);
             bottomPanel.add(letraLabel);
         }else{
             bottomPanel.add(new JLabel("Ingresa una letra:"));
@@ -147,10 +151,12 @@ public class UIAhorcado extends JFrame implements ServidorListener {
                 letraLabel.setText("Ultima letra intentada: " + letra);
             } else if (mensaje.contains("Juego terminado")) {
                 JOptionPane.showMessageDialog(null, mensaje, "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
-                try {
-                    socket.close(); // Cerrar conexión
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                int juegoNuevo = JOptionPane.showConfirmDialog(this, "Deseas jugar de nuevo?");
+                if (juegoNuevo == JOptionPane.YES_OPTION) {
+                    this.dispose();
+                    new UIPrincipal();
+                } else if (juegoNuevo == JOptionPane.NO_OPTION){
+                    System.exit(0);
                 }
             }
         });

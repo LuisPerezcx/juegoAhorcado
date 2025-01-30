@@ -21,7 +21,7 @@ public class ServidorAhorcado {
 
         new Thread(() -> {
             System.out.println("🚀 Servidor iniciado en el puerto " + PUERTO);
-            try (ServerSocket serverSocket = new ServerSocket(PUERTO)) {
+            try (ServerSocket serverSocket = new ServerSocket(PUERTO,50)) {
                 while (true) {
                     Socket cliente = serverSocket.accept();
                     System.out.println("🔹 Nuevo jugador conectado: " + cliente.getInetAddress());

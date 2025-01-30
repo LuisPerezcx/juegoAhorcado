@@ -25,19 +25,9 @@ public class ServidorAhorcado {
                 while (true) {
                     Socket cliente = serverSocket.accept();
                     System.out.println("🔹 Nuevo jugador conectado: " + cliente.getInetAddress());
-                    // Crear PrintWriter para la comunicación con el cliente
                     PrintWriter salidaCliente = new PrintWriter(cliente.getOutputStream(), true);
+                    pool.execute(new ManejadorCliente(cliente, palabraSecreta, salidaCliente));
 
-                    // Suponiendo que el host está en otro socket o proceso, aquí solo se ejemplifica
-                    PrintWriter salidaHost = new PrintWriter(cliente.getOutputStream(), true); // Modificar según tu diseño real
-
-                    if(salidaHost == null){
-                        salidaHost = salidaCliente;
-                        salidaHost.println("Eres el host, esperando jugadores...");
-                    } else {
-                        pool.execute(new ManejadorCliente(cliente, palabraSecreta, salidaHost, salidaCliente));
-
-                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -48,5 +38,9 @@ public class ServidorAhorcado {
         ejecutando = false;
         pool.shutdown();  // Detenemos el pool de hilos
         System.out.println("🛑 Servidor detenido.");
+    }
+    public static void main(String[] args) {
+        // Iniciar el servidor con una palabra secreta
+        iniciarServidor("JAVA");
     }
 }

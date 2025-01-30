@@ -85,28 +85,35 @@ public class UIAhorcado extends JFrame {
     private void iniciarServidor(String palabra) {
         ServidorAhorcado servidorAhorcado = new ServidorAhorcado();
         servidorAhorcado.iniciarServidor(palabra);
+        //aqui debo de darle un valor a salida
     }
 
     private void conectarCliente(String ipAddress){
-        ClienteAhorcado clienteAhorcado = new ClienteAhorcado(ipAddress);
-        new Thread(() -> {
-            try {
-                String mensaje;
-                // Simulamos la escucha de mensajes del servidor.
-                while ((mensaje = clienteAhorcado.entradaServidor.readLine()) != null) {
-                    // Procesamos el mensaje recibido, dependiendo del tipo.
-                    if (mensaje.contains("Palabra")) {
-                        //actualizarPalabra(mensaje);
-                    } else if (mensaje.contains("Intentos restantes")) {
-                        //actualizarIntentos(mensaje);
-                    } else if (mensaje.contains("Juego terminado")) {
-                        //finDelJuego(mensaje);
+        try {
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(ipAddress, 5000),500);
+            socket.setSoTimeout(5000);
+            entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            salida = new PrintWriter(socket.getOutputStream(), true);
+
+            new Thread(() -> {
+                try {
+                    String mensaje;
+                    while ((mensaje = entrada.readLine()) != null) {
+                        manejarMensaje(mensaje);
                     }
+                } catch (SocketTimeoutException e){
+                    JOptionPane.showMessageDialog(null, "Se agotó el tiempo de espera para recibir datos.", "Timeout", JOptionPane.WARNING_MESSAGE);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
+            }).start();
+
+        } catch (SocketTimeoutException e) {
+            JOptionPane.showMessageDialog(null, "No se pudo conectar al servidor en el tiempo establecido.", "Error de Conexión", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "No se pudo conectar al servidor", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
 

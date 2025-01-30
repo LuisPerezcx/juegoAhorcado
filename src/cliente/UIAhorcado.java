@@ -188,6 +188,8 @@ public class UIAhorcado extends JFrame implements ServidorListener {
                 servidorGano = false;
             } else if(mensaje.contains("¡Lo siento! Has perdido. La palabra era:")){
                 servidorGano = true;
+                palabra=mensaje.substring(44);
+                System.out.println(palabra);
             } else if (mensaje.contains("Juego terminado")) {
                 if(esHost){
                     JOptionPane.showMessageDialog(null, mensaje + (servidorGano? " Ganaste!":" Perdiste :("), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);

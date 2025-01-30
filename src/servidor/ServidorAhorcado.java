@@ -15,12 +15,14 @@ public class ServidorAhorcado {
     private List<ManejadorCliente> listaClientes = new ArrayList<>(); // Lista para manejar las conexiones de clientes
     private Thread hiloServidor; // Para manejar el hilo que ejecuta el servidor
     private volatile boolean cerrando = false; // Variable de control para cerrar el servidor de manera segura
+    private String palabra;
 
     public ServidorAhorcado(ServidorListener listener){
         this.listener = listener;
     }
 
     public void iniciarServidor(String palabra) {
+        this.palabra = palabra;
 
         if (ejecutando) {
             System.out.println("⚠️ El servidor ya está en ejecución.");
@@ -112,6 +114,10 @@ public class ServidorAhorcado {
             enviarMensaje("❌ Error al cerrar el servidor: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public String getPalabra() {
+        return palabra;
     }
 }
 

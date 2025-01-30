@@ -190,11 +190,11 @@ public class UIAhorcado extends JFrame implements ServidorListener {
                 servidorGano = true;
             } else if (mensaje.contains("Juego terminado")) {
                 if(esHost){
-                    servidorAhorcado.cerrarServidor();
                     JOptionPane.showMessageDialog(null, mensaje + (servidorGano? " Ganaste!":" Perdiste :("), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
                 } else JOptionPane.showMessageDialog(null, mensaje +(servidorGano? " Perdiste :(": " Ganaste!"), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
                 int juegoNuevo = JOptionPane.showConfirmDialog(this, "Deseas jugar de nuevo?");
                 if (juegoNuevo == JOptionPane.YES_OPTION) {
+                    servidorAhorcado.cerrarServidor();
                     this.dispose();
                     new UIPrincipal();
                 } else if (juegoNuevo == JOptionPane.NO_OPTION){

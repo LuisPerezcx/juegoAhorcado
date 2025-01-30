@@ -8,6 +8,11 @@ public class ServidorAhorcado {
     public static ExecutorService pool = Executors.newFixedThreadPool(2);
     private static final int PUERTO = 5000;
     private static boolean ejecutando = false;
+    private ServidorListener listener;
+
+    public ServidorAhorcado(ServidorListener listener){
+        this.listener = listener;
+    }
 
     public void iniciarServidor(String palabra) {
 
@@ -18,17 +23,24 @@ public class ServidorAhorcado {
         ejecutando = true;
 
         new Thread(() -> {
-            System.out.println("🚀 Servidor iniciado en el puerto " + PUERTO);
+            enviarMensaje("🚀 Servidor iniciado en el puerto " + PUERTO);
             try (ServerSocket serverSocket = new ServerSocket(PUERTO)) {
                 while (true) {
                     Socket cliente = serverSocket.accept();
-                    System.out.println("🔹 Nuevo jugador conectado: " + cliente.getInetAddress());
-                    pool.execute(new ManejadorCliente(cliente,palabra)); // Manejar el cliente en un hilo separado
+                    enviarMensaje("🔹 Nuevo jugador conectado: " + cliente.getInetAddress());
+                    pool.execute(new ManejadorCliente(cliente,palabra,listener)); // Manejar el cliente en un hilo separado
                 }
             } catch (IOException e) {
+                enviarMensaje("❌ Error en el servidor: " + e.getMessage());
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    private void enviarMensaje(String mensaje) {
+        if (listener != null) {
+            listener.onMensajeRecibido(mensaje);
+        }
     }
 
 }

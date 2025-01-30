@@ -1,6 +1,7 @@
 package cliente;
 
 import servidor.ServidorAhorcado;
+import servidor.ServidorListener;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -14,8 +15,8 @@ import java.util.Enumeration;
 
 import static java.lang.System.exit;
 
-public class UIAhorcado extends JFrame {
-    private JLabel palabraLabel, intentosLabel;
+public class UIAhorcado extends JFrame implements ServidorListener {
+    private JLabel palabraLabel, intentosLabel, letraLabel;
     private JTextField letraInput;
     private JButton enviarBtn;
     private AhorcadoPanel ahorcadoPanel;
@@ -26,6 +27,7 @@ public class UIAhorcado extends JFrame {
     private PrintWriter salida;
 
     private boolean esHost;
+    private boolean nuevoJugador = false;
 
     public UIAhorcado(String palabra, boolean esHost, String ipAddress) {
         this.esHost = esHost;
@@ -42,15 +44,20 @@ public class UIAhorcado extends JFrame {
         add(bottomPanel, BorderLayout.SOUTH);
 
         if(esHost){
-            bottomPanel.setVisible(false);
             iniciarServidor(palabra);
         } else {
             enviarBtn.addActionListener(e -> enviarLetra());
+            letraInput.addActionListener(e -> enviarLetra());
             conectarCliente(ipAddress);
         }
 
         setVisible(true);
         setLocationRelativeTo(null);
+        if(esHost){
+            do{
+                JOptionPane.showMessageDialog(null,"Esperando jugador...\nIP: "+obtenerIPLocal());
+            }while(!nuevoJugador);
+        }
     }
 
     private void construirVentana(){
@@ -76,14 +83,19 @@ public class UIAhorcado extends JFrame {
         bottomPanel = new JPanel();
         letraInput = new JTextField(5);
         enviarBtn = new JButton("Enviar");
+        letraLabel = new JLabel("");
 
-        bottomPanel.add(new JLabel("Ingresa una letra:"));
-        bottomPanel.add(letraInput);
-        bottomPanel.add(enviarBtn);
+        if(esHost){
+            bottomPanel.add(letraLabel);
+        }else{
+            bottomPanel.add(new JLabel("Ingresa una letra:"));
+            bottomPanel.add(letraInput);
+            bottomPanel.add(enviarBtn);
+        }
     }
 
     private void iniciarServidor(String palabra) {
-        ServidorAhorcado servidorAhorcado = new ServidorAhorcado();
+        ServidorAhorcado servidorAhorcado = new ServidorAhorcado(this);
         servidorAhorcado.iniciarServidor(palabra);
         //aqui debo de darle un valor a salida
     }
@@ -92,7 +104,6 @@ public class UIAhorcado extends JFrame {
         try {
             socket = new Socket();
             socket.connect(new InetSocketAddress(ipAddress, 5000),500);
-            socket.setSoTimeout(5000);
             entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             salida = new PrintWriter(socket.getOutputStream(), true);
 
@@ -102,8 +113,6 @@ public class UIAhorcado extends JFrame {
                     while ((mensaje = entrada.readLine()) != null) {
                         manejarMensaje(mensaje);
                     }
-                } catch (SocketTimeoutException e){
-                    JOptionPane.showMessageDialog(null, "Se agotó el tiempo de espera para recibir datos.", "Timeout", JOptionPane.WARNING_MESSAGE);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -123,6 +132,7 @@ public class UIAhorcado extends JFrame {
         SwingUtilities.invokeLater(() -> {
             if(mensaje.contains("Nuevo jugador conectado:")){
                 JOptionPane.showMessageDialog(null, "Un nuevo jugador se ha unido al juego.", "Jugador Unido", JOptionPane.INFORMATION_MESSAGE);
+                nuevoJugador = true;
             }
             if (mensaje.startsWith("Palabra:")) {
                 String mensajeConEspacios = mensaje.substring(9);
@@ -132,6 +142,9 @@ public class UIAhorcado extends JFrame {
                 int intentosRestantes =  Integer.parseInt(mensaje.substring(20));
                 intentosLabel.setText("Intentos restantes: " + intentosRestantes);
                 ahorcadoPanel.actualizarDibujo(intentosRestantes);
+            } else if (mensaje.startsWith("Letra: ")){
+                String letra = mensaje.substring(7);
+                letraLabel.setText("Ultima letra intentada: " + letra);
             } else if (mensaje.contains("Juego terminado")) {
                 JOptionPane.showMessageDialog(null, mensaje, "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
                 try {
@@ -151,6 +164,12 @@ public class UIAhorcado extends JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "Por favor ingresa solo una letra.", "Entrada inválida", JOptionPane.WARNING_MESSAGE);
         }
+    }
+
+    @Override
+    public void onMensajeRecibido(String mensaje) {
+        System.out.println(mensaje);
+        manejarMensaje(mensaje);
     }
 
     static class AhorcadoPanel extends JPanel {

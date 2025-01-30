@@ -1,5 +1,7 @@
 package cliente;
 
+import servidor.ServidorAhorcado;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -25,8 +27,9 @@ public class UIAhorcado extends JFrame {
 
     private boolean esHost;
 
-    public UIAhorcado(boolean esHost, String ipAddress) {
+    public UIAhorcado(String palabra, boolean esHost, String ipAddress) {
         this.esHost = esHost;
+
 
         setTitle("Ahorcado Multijugador 🎮 - " + (esHost ? "Host" : "Jugador"));
         setSize(300, 400);
@@ -40,7 +43,7 @@ public class UIAhorcado extends JFrame {
 
         if(esHost){
             bottomPanel.setVisible(false);
-            conectarServidor();
+            iniciarServidor(palabra);
         } else {
             enviarBtn.addActionListener(e -> enviarLetra());
             conectarCliente(ipAddress);
@@ -79,6 +82,11 @@ public class UIAhorcado extends JFrame {
         bottomPanel.add(enviarBtn);
     }
 
+    private void iniciarServidor(String palabra) {
+        ServidorAhorcado servidorAhorcado = new ServidorAhorcado();
+        servidorAhorcado.iniciarServidor(palabra);
+    }
+
     private void conectarCliente(String ipAddress){
         ClienteAhorcado clienteAhorcado = new ClienteAhorcado(ipAddress);
         new Thread(() -> {
@@ -102,36 +110,12 @@ public class UIAhorcado extends JFrame {
     }
 
 
-    private void conectarServidor() {
-        try {
-            socket = new Socket();
-            socket.connect(new InetSocketAddress("localhost", 5000),5000);
-            entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            salida = new PrintWriter(socket.getOutputStream(), true);
-
-            new Thread(() -> {
-                try {
-                    String mensaje;
-                    while ((mensaje = entrada.readLine()) != null) {
-                        manejarMensaje(mensaje);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-
-        } catch (SocketTimeoutException e) {
-            JOptionPane.showMessageDialog(null, "No se pudo conectar al servidor en el tiempo establecido.", "Error de Conexión", JOptionPane.ERROR_MESSAGE);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "No se pudo conectar al servidor", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
 
     private void manejarMensaje(String mensaje) {
         System.out.println(mensaje);
         SwingUtilities.invokeLater(() -> {
             if(mensaje.contains("Nuevo jugador conectado:")){
-                JOptionPane.showMessageDialog(this, "Un nuevo jugador se ha unido al juego.", "Jugador Unido", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Un nuevo jugador se ha unido al juego.", "Jugador Unido", JOptionPane.INFORMATION_MESSAGE);
             }
             if (mensaje.startsWith("Palabra:")) {
                 String mensajeConEspacios = mensaje.substring(9);
@@ -142,7 +126,7 @@ public class UIAhorcado extends JFrame {
                 intentosLabel.setText("Intentos restantes: " + intentosRestantes);
                 ahorcadoPanel.actualizarDibujo(intentosRestantes);
             } else if (mensaje.contains("Juego terminado")) {
-                JOptionPane.showMessageDialog(this, mensaje, "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, mensaje, "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
                 try {
                     socket.close(); // Cerrar conexión
                 } catch (IOException ex) {

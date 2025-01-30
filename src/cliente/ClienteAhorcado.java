@@ -10,10 +10,11 @@ import java.net.Socket;
 
 import static servidor.ServidorAhorcado.pool;
 
+
 public class ClienteAhorcado {
     private static final int PUERTO = 5000;
     private Socket socket;
-    BufferedReader entradaServidor;
+    public BufferedReader entradaServidor;
     private PrintWriter salidaCliente;
 
     public ClienteAhorcado(String ipServidor){

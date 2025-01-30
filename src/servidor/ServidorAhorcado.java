@@ -5,20 +5,17 @@ import java.net.*;
 import java.util.concurrent.*;
 
 public class ServidorAhorcado {
-    private static final int PUERTO = 5000;
     public static ExecutorService pool = Executors.newFixedThreadPool(2);
+    private static final int PUERTO = 5000;
     private static boolean ejecutando = false;
-    private static String palabraSecreta;
 
+    public void iniciarServidor(String palabra) {
 
-
-    public static void iniciarServidor(String palabra) {
         if(ejecutando) {
             System.out.println("⚠️ El servidor ya está en ejecución.");
             return;
         }
         ejecutando = true;
-        palabraSecreta = palabra;
 
         new Thread(() -> {
             System.out.println("🚀 Servidor iniciado en el puerto " + PUERTO);
@@ -26,7 +23,7 @@ public class ServidorAhorcado {
                 while (true) {
                     Socket cliente = serverSocket.accept();
                     System.out.println("🔹 Nuevo jugador conectado: " + cliente.getInetAddress());
-                    pool.execute(new ManejadorCliente(cliente,palabraSecreta));
+                    pool.execute(new ManejadorCliente(cliente,palabra)); // Manejar el cliente en un hilo separado
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -34,9 +31,6 @@ public class ServidorAhorcado {
         }).start();
     }
 
-    public static void detenerServidor() {
-        ejecutando = false;
-        pool.shutdown();  // Detenemos el pool de hilos
-        System.out.println("🛑 Servidor detenido.");
-    }
 }
+
+

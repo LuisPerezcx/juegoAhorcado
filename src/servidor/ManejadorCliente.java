@@ -4,18 +4,23 @@ import java.io.*;
 import java.net.*;
 
 public class ManejadorCliente implements Runnable {
-    private Socket socket;
+    private Socket clienteSocket;
+    private BufferedReader entrada;
+    private PrintWriter salida;
+    private String palabra;
     private Partida partida;
 
-    public ManejadorCliente(Socket socket, String palabra) {
-        this.socket = socket;
+    public ManejadorCliente(Socket clienteSocket, String palabra) {
+        this.clienteSocket = clienteSocket;
         this.partida = new Partida(palabra);
     }
 
     @Override
     public void run() {
-        try (BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter salida = new PrintWriter(socket.getOutputStream(), true)) {
+        try {
+            // Configurar flujo de entrada y salida con el cliente
+            entrada = new BufferedReader(new InputStreamReader(clienteSocket.getInputStream()));
+            salida = new PrintWriter(clienteSocket.getOutputStream(), true);
 
             salida.println("🎮 Bienvenido al Ahorcado. Adivina la palabra.");
 
@@ -29,11 +34,14 @@ public class ManejadorCliente implements Runnable {
                     partida.intentarLetra(letra.charAt(0));
                 }
             }
-
-            salida.println("✅ Juego terminado. La palabra era: " + partida.getPalabra());
-            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                clienteSocket.close(); // Cerrar la conexión cuando se termine
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -70,8 +70,8 @@ public class UIAhorcado extends JFrame implements ServidorListener {
         dialog.setSize(250, 150);
         dialog.setLocationRelativeTo(null);  // Centrar el diálogo
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        dialog.setAlwaysOnTop(true);  // Hacer que el JDialog esté siempre encima de otras ventanas
         dialog.setVisible(true);
+        dialog.toFront();
         dialog.setResizable(false);
 
         // Usar un hilo separado para verificar cuando el jugador se conecta
@@ -153,6 +153,7 @@ public class UIAhorcado extends JFrame implements ServidorListener {
 
         } catch (SocketTimeoutException e) {
             JOptionPane.showMessageDialog(null, "No se pudo conectar al servidor en el tiempo establecido.", "Error de Conexión", JOptionPane.ERROR_MESSAGE);
+            exit(0);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "No se pudo conectar al servidor", "Error", JOptionPane.ERROR_MESSAGE);
         }

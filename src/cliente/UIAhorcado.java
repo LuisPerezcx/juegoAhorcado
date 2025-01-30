@@ -21,14 +21,18 @@ public class UIAhorcado extends JFrame implements ServidorListener {
     private JButton enviarBtn;
     private AhorcadoPanel ahorcadoPanel;
     private JPanel topPanel, bottomPanel;
+    private JDialog dialog;
 
     private Socket socket;
     private BufferedReader entrada;
     private PrintWriter salida;
+    ServidorAhorcado servidorAhorcado;
 
     private boolean esHost;
     private boolean nuevoJugador = false;
     private String palabra;
+
+    private boolean servidorGano;
 
     public UIAhorcado(String palabra, boolean esHost, String ipAddress) {
         this.esHost = esHost;
@@ -46,6 +50,7 @@ public class UIAhorcado extends JFrame implements ServidorListener {
 
         if(esHost){
             iniciarServidor(palabra);
+            mostrarEsperandoJugador();
         } else {
             enviarBtn.addActionListener(e -> enviarLetra());
             letraInput.addActionListener(e -> enviarLetra());
@@ -54,11 +59,36 @@ public class UIAhorcado extends JFrame implements ServidorListener {
 
         setVisible(true);
         setLocationRelativeTo(null);
-        if(esHost){
-            do{
-                JOptionPane.showMessageDialog(null,"Esperando jugador...\nIP: "+obtenerIPLocal());
-            }while(!nuevoJugador);
-        }
+        setResizable(false);
+    }
+
+    private void mostrarEsperandoJugador() {
+        dialog = new JDialog();
+        dialog.setTitle("Esperando jugador...");
+        JLabel mensaje = new JLabel("Esperando jugador...\nIP: " + obtenerIPLocal(), SwingConstants.CENTER);
+        dialog.getContentPane().add(mensaje, BorderLayout.CENTER);
+        dialog.setSize(250, 150);
+        dialog.setLocationRelativeTo(null);  // Centrar el diálogo
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        dialog.setAlwaysOnTop(true);  // Hacer que el JDialog esté siempre encima de otras ventanas
+        dialog.setVisible(true);
+        dialog.setResizable(false);
+
+        // Usar un hilo separado para verificar cuando el jugador se conecta
+        new Thread(() -> {
+            while (!nuevoJugador) {
+                try {
+                    Thread.sleep(1000); // Espera 1 segundo antes de verificar nuevamente
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // Una vez que el jugador se conecta, cerramos el JDialog
+            SwingUtilities.invokeLater(() -> {
+                dialog.dispose(); // Cierra el JDialog
+            });
+        }).start();
     }
 
     private void construirVentana(){
@@ -99,9 +129,8 @@ public class UIAhorcado extends JFrame implements ServidorListener {
     }
 
     private void iniciarServidor(String palabra) {
-        ServidorAhorcado servidorAhorcado = new ServidorAhorcado(this);
+        servidorAhorcado = new ServidorAhorcado(this);
         servidorAhorcado.iniciarServidor(palabra);
-        //aqui debo de darle un valor a salida
     }
 
     private void conectarCliente(String ipAddress){
@@ -147,18 +176,23 @@ public class UIAhorcado extends JFrame implements ServidorListener {
                 intentosLabel.setText("Intentos restantes: " + intentosRestantes);
                 ahorcadoPanel.actualizarDibujo(intentosRestantes);
             } else if (mensaje.startsWith("Letra: ")){
+                System.out.println("++++"+mensaje);
                 String letra = mensaje.substring(7);
                 letraLabel.setText("Ultima letra intentada: " + letra);
             } else if (mensaje.contains("¡Felicidades! Has adivinado la palabra:")){
-                if(esHost) {
-                    JOptionPane.showMessageDialog(null, "El jugador adivino la palabra", "Perdiste!", JOptionPane.ERROR_MESSAGE);
-                } else JOptionPane.showMessageDialog(null,mensaje,"Ganaste!",JOptionPane.OK_OPTION);
+                if (mensaje.contains("Letra: ")) {
+                    System.out.println("------"+mensaje);
+                    String ultimaLetra = mensaje.substring(mensaje.indexOf("Letra: ") + 7, mensaje.indexOf("Letra: ") + 8);
+                    letraLabel.setText("Ultima letra intentada: " + ultimaLetra);
+                }
+                servidorGano = false;
             } else if(mensaje.contains("¡Lo siento! Has perdido. La palabra era:")){
-                if(esHost) {
-                    JOptionPane.showMessageDialog(null, "El jugador no adivino la palabra", "Ganaste!", JOptionPane.OK_OPTION);
-                } else JOptionPane.showMessageDialog(null,mensaje,"Perdiste :(",JOptionPane.ERROR_MESSAGE);
+                servidorGano = true;
             } else if (mensaje.contains("Juego terminado")) {
-                JOptionPane.showMessageDialog(null, mensaje, "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
+                servidorAhorcado.cerrarServidor();
+                if(esHost){
+                    JOptionPane.showMessageDialog(null, mensaje + (servidorGano? " Ganaste!":" Perdiste :("), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
+                } else JOptionPane.showMessageDialog(null, mensaje +(servidorGano? " Perdiste :(": " Ganaste!"), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
                 int juegoNuevo = JOptionPane.showConfirmDialog(this, "Deseas jugar de nuevo?");
                 if (juegoNuevo == JOptionPane.YES_OPTION) {
                     this.dispose();

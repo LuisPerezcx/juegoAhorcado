@@ -104,7 +104,7 @@ class ControllerBtns implements ActionListener{
         Object e = actionEvent.getSource();
         if(e == ui.btnCrear){
             System.out.println("crear juego!");
-            String palabra = JOptionPane.showInputDialog("ingresa una palabra para juagar",null);
+            String palabra = JOptionPane.showInputDialog("ingresa una palabra para jugar",null);
             if(palabra != null && !palabra.isEmpty()){
                 ui.dispose();
                 new UIAhorcado(palabra,true, null);
@@ -119,5 +119,9 @@ class ControllerBtns implements ActionListener{
             }
             System.out.println("unirse a juego!");
         }
+    }
+
+    public static void main(String[] args) {
+        new UIPrincipal();
     }
 }

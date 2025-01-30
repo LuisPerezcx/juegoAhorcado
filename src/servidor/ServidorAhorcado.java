@@ -9,6 +9,7 @@ public class ServidorAhorcado {
     private static final int PUERTO = 5000;
     private static boolean ejecutando = false;
     private ServidorListener listener;
+    private ServerSocket serverSocket; // Para poder cerrarlo después
 
     public ServidorAhorcado(ServidorListener listener){
         this.listener = listener;
@@ -43,6 +44,35 @@ public class ServidorAhorcado {
         }
     }
 
+
+    public void cerrarServidor() {
+        if (!ejecutando) {
+            System.out.println("⚠️ El servidor no está en ejecución.");
+            return;
+        }
+
+        try {
+            // Cerrar el ServerSocket para que no acepte más conexiones
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+                enviarMensaje("🔴 El servidor ha sido cerrado.");
+            }
+
+            // Detener el pool de hilos y liberar recursos
+            if (!pool.isShutdown()) {
+                pool.shutdown();
+                if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
+                    pool.shutdownNow();
+                }
+                enviarMensaje("🔴 Los recursos del servidor han sido liberados.");
+            }
+
+            ejecutando = false;
+        } catch (IOException | InterruptedException e) {
+            enviarMensaje("❌ Error al cerrar el servidor: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }
 
 

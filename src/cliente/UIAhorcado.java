@@ -71,8 +71,9 @@ public class UIAhorcado extends JFrame implements ServidorListener {
         dialog.setLocationRelativeTo(null);  // Centrar el diálogo
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         dialog.setVisible(true);
+        dialog.setAlwaysOnTop(true); // Hacer que la ventana esté siempre encima
         dialog.toFront();
-        dialog.requestFocus();
+        dialog.setAlwaysOnTop(false); // Volver a la configuración normal
         dialog.setResizable(false);
 
         // Usar un hilo separado para verificar cuando el jugador se conecta

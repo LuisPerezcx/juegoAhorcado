@@ -113,7 +113,8 @@ class ControllerBtns implements ActionListener{
             }
         } else if(e == ui.btnUnirse){
             String ipAdress = JOptionPane.showInputDialog("Ingresa la ip del host",null);
-            if(ipAdress!= null){
+            ipAdress = ipAdress.trim();
+            if(!ipAdress.isEmpty()){
                 ui.dispose();
                 new UIAhorcado(null,false, ipAdress);
             }

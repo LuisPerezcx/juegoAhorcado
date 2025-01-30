@@ -28,6 +28,12 @@ public class ServidorAhorcado {
         }
         ejecutando = true;
 
+        // Reiniciar el ThreadPoolExecutor si está apagado
+        if (pool.isShutdown() || pool.isTerminated()) {
+            pool = Executors.newFixedThreadPool(2);
+        }
+
+
         hiloServidor = new Thread(() -> {
             enviarMensaje("🚀 Servidor iniciado en el puerto " + PUERTO);
             try (ServerSocket serverSocket = new ServerSocket(PUERTO)) {

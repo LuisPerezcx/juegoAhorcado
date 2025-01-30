@@ -5,8 +5,6 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        int s = JOptionPane.showConfirmDialog(null, "Juego");
-        System.out.println(s);
-        //new UIPrincipal();
+        new UIPrincipal();
     }
 }

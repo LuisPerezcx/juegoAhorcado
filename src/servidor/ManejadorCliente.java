@@ -57,4 +57,16 @@ public class ManejadorCliente implements Runnable {
             listener.onMensajeRecibido(mensaje); // Notificar al servidor
         }
     }
+
+    public void cerrarConexion() {
+        try {
+            if (clienteSocket != null && !clienteSocket.isClosed()) {
+                clienteSocket.close(); // Cerrar el socket del cliente
+                System.out.println("Conexión cerrada para el cliente.");
+            }
+        } catch (IOException e) {
+            System.out.println("Error al cerrar la conexión del cliente: " + e.getMessage());
+        }
+    }
+
 }

@@ -2,6 +2,8 @@ package servidor;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 
 public class ServidorAhorcado {
@@ -10,6 +12,7 @@ public class ServidorAhorcado {
     private static boolean ejecutando = false;
     private ServidorListener listener;
     private ServerSocket serverSocket; // Para poder cerrarlo después
+    private List<ManejadorCliente> listaClientes = new ArrayList<>(); // Lista para manejar las conexiones de clientes
 
     public ServidorAhorcado(ServidorListener listener){
         this.listener = listener;
@@ -26,10 +29,13 @@ public class ServidorAhorcado {
         new Thread(() -> {
             enviarMensaje("🚀 Servidor iniciado en el puerto " + PUERTO);
             try (ServerSocket serverSocket = new ServerSocket(PUERTO)) {
+                this.serverSocket = serverSocket;
                 while (true) {
                     Socket cliente = serverSocket.accept();
                     enviarMensaje("🔹 Nuevo jugador conectado: " + cliente.getInetAddress());
-                    pool.execute(new ManejadorCliente(cliente,palabra,listener)); // Manejar el cliente en un hilo separado
+                    ManejadorCliente manejadorCliente = new ManejadorCliente(cliente, palabra, listener);
+                    listaClientes.add(manejadorCliente); // Guardamos el manejador para poder cerrar la conexión después
+                    pool.execute(manejadorCliente); // Manejar el cliente en un hilo separado
                 }
             } catch (IOException e) {
                 enviarMensaje("❌ Error en el servidor: " + e.getMessage());
@@ -52,6 +58,11 @@ public class ServidorAhorcado {
         }
 
         try {
+            // Cerrar las conexiones de los clientes activos
+            for (ManejadorCliente manejador : listaClientes) {
+                manejador.cerrarConexion();
+            }
+
             // Cerrar el ServerSocket para que no acepte más conexiones
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();

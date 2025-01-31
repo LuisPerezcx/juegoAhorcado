@@ -59,7 +59,7 @@ public class UIAhorcado extends JFrame implements ServidorListener {
 
         setVisible(true);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
     }
 
     private void mostrarEsperandoJugador() {

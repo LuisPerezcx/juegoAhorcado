@@ -51,6 +51,9 @@ public class ManejadorCliente implements Runnable {
                     } else {
                         enviarMensaje("⚠️ Ingresa solo letras, sin números ni símbolos.");
                     }
+                } else if (letra.equals(" ")) {
+                    // Si el cliente intenta ingresar un espacio, le informamos que no cuenta
+                    enviarMensaje("⚠️ El espacio no cuenta como letra.");
                 } else {
                     System.out.println("El cliente cerró la conexión");
 

@@ -28,7 +28,7 @@ public class ManejadorCliente implements Runnable {
 
 
             while (!partida.juegoTerminado()) {
-                enviarMensaje("Palabra: " + partida.getPalabraOculta());
+                enviarMensaje("Palabra: " + partida.getPalabraOculta().replaceAll("(?<=\\S)(?=\\S)", " "));
                 enviarMensaje("Intentos restantes: " + partida.getIntentosRestantes());
                 enviarMensaje("Ingresa una letra:");
 

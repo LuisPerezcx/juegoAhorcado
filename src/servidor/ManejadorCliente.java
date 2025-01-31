@@ -45,8 +45,7 @@ public class ManejadorCliente implements Runnable {
                             "Conexión cerrada",
                             JOptionPane.INFORMATION_MESSAGE
                     );
-
-                    break;
+                    System.exit(0);
                 }
             }
             if(partida.juegoTerminado()) {
@@ -59,7 +58,13 @@ public class ManejadorCliente implements Runnable {
             }
         } catch (SocketException e) {
             // 🔹 Manejo especial para evitar error feo en consola
-            System.out.println("⚠ Cliente desconectado.");
+            JOptionPane.showMessageDialog(
+                    null,
+                    "El cliente ha cerrado la conexión. El servidor se cerrará.",
+                    "Conexión cerrada",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            System.exit(0);
         }catch (IOException e) {
             enviarMensaje("❌ Error en el cliente: " + e.getMessage());
             e.printStackTrace();

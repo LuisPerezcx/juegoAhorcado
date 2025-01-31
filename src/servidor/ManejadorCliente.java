@@ -46,10 +46,10 @@ public class ManejadorCliente implements Runnable {
                             JOptionPane.INFORMATION_MESSAGE
                     );
 
-                    System.exit(0); // Cierra el programa
+                    break;
                 }
             }
-            if(partida.juegoTerminado()){
+            if(partida.juegoTerminado()) {
                 if (partida.getPalabraOculta().equals(partida.getPalabra())) {
                     enviarMensaje("🎉 ¡Felicidades! Has adivinado la palabra: " + partida.getPalabra());
                 } else {
@@ -57,14 +57,22 @@ public class ManejadorCliente implements Runnable {
                 }
                 enviarMensaje("Juego terminado");
             }
-        } catch (IOException e) {
+        } catch (SocketException e) {
+            // 🔹 Manejo especial para evitar error feo en consola
+            System.out.println("⚠ Cliente desconectado.");
+        }catch (IOException e) {
             enviarMensaje("❌ Error en el cliente: " + e.getMessage());
             e.printStackTrace();
+        }finally {
+            cerrarConexion();
         }
     }
 
     private void enviarMensaje(String mensaje) {
         salida.println(mensaje); // Enviar al cliente
+        if (salida !=null){
+            salida.println(mensaje);
+        }
         if (listener != null) {
             listener.onMensajeRecibido(mensaje); // Notificar al servidor
         }

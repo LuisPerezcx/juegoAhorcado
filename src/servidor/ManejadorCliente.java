@@ -1,5 +1,6 @@
 package servidor;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.*;
 
@@ -35,6 +36,17 @@ public class ManejadorCliente implements Runnable {
                 if (letra != null) {
                     enviarMensaje("Letra: "+ letra);
                     partida.intentarLetra(letra.charAt(0));
+                } else {
+                    System.out.println("El cliente cerró la conexión");
+
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "El cliente ha cerrado la conexión. El servidor se cerrará.",
+                            "Conexión cerrada",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+
+                    System.exit(0); // Cierra el programa
                 }
             }
             if(partida.juegoTerminado()){

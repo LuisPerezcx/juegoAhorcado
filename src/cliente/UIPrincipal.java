@@ -106,8 +106,12 @@ class ControllerBtns implements ActionListener{
             System.out.println("crear juego!");
             String palabra = JOptionPane.showInputDialog("ingresa una palabra para jugar",null);
             if(palabra != null && !palabra.isEmpty()){
-                ui.dispose();
-                new UIAhorcado(palabra,true, null);
+                if (palabra.matches("[A-Za-z0-9¡¿?.,;:'\"()\\s]*")) {
+                    ui.dispose();
+                    new UIAhorcado(palabra, true, null);
+                }else {
+                    JOptionPane.showMessageDialog(null, "La palabra solo puede contener letras, números y caracteres especiales válidos.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }else{
                 JOptionPane.showMessageDialog(null, "Debes ingresar una palabra válida", "Error", JOptionPane.ERROR_MESSAGE);
             }

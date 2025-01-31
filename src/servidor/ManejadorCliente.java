@@ -28,7 +28,7 @@ public class ManejadorCliente implements Runnable {
 
 
             while (!partida.juegoTerminado()) {
-                enviarMensaje("Palabra: " + partida.getPalabraOculta().replaceAll("(?<=\\S)(?=\\S)", " "));
+                enviarMensaje("Palabra: " + partida.getPalabraOculta().replaceAll("", " ").trim());
                 enviarMensaje("Intentos restantes: " + partida.getIntentosRestantes());
                 enviarMensaje("Ingresa una letra:");
 
@@ -111,5 +111,7 @@ public class ManejadorCliente implements Runnable {
             System.out.println("Error al cerrar la conexión del cliente: " + e.getMessage());
         }
     }
+
+
 
 }

@@ -28,32 +28,14 @@ public class ManejadorCliente implements Runnable {
 
 
             while (!partida.juegoTerminado()) {
-                enviarMensaje("Palabra: " + partida.getPalabraOculta().replaceAll("", " ").trim());
+                enviarMensaje("Palabra: " + partida.getPalabraOculta());
                 enviarMensaje("Intentos restantes: " + partida.getIntentosRestantes());
                 enviarMensaje("Ingresa una letra:");
 
                 String letra = entrada.readLine();
-                if (letra != null &&!letra.isEmpty()) {
-                    letra = letra.replaceAll("\\s+", "");
-
-                    if (letra.length() > 2) {
-                        enviarMensaje("⚠️ Solo puedes ingresar una o dos letras.");
-                        continue; // 🔹 Pedir entrada de nuevo sin afectar el juego
-                    }
-                    // 🔹 Validar que solo sean letras (sin números ni símbolos)
-                    if (letra.matches("[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ]{1,2}")) {
-                        enviarMensaje("Letras ingresadas: " + letra);
-
-                        // 🔹 Intentar cada letra por separado
-                        for (char c : letra.toCharArray()) {
-                            partida.intentarLetra(c);
-                        }
-                    } else {
-                        enviarMensaje("⚠️ Ingresa solo letras, sin números ni símbolos.");
-                    }
-                } else if (letra.equals(" ")) {
-                    // Si el cliente intenta ingresar un espacio, le informamos que no cuenta
-                    enviarMensaje("⚠️ El espacio no cuenta como letra.");
+                if (letra != null) {
+                    enviarMensaje("Letra: "+ letra);
+                    partida.intentarLetra(letra.charAt(0));
                 } else {
                     System.out.println("El cliente cerró la conexión");
 

@@ -111,7 +111,7 @@ class ControllerBtns implements ActionListener{
                     JOptionPane.showMessageDialog(null, "Solo puedes ingresar una palabra.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else if (palabra.length() > maximoLetras) {
                     JOptionPane.showMessageDialog(null,"La palabra no puede tener más de " + maximoLetras + " caracteres.", "Error", JOptionPane.ERROR_MESSAGE);
-                }else if (palabra.matches("[A-Za-z0-9¡¿?.,;:'\"()\\s]*")) {
+                }else if (palabra.matches("^[A-Za-z\\s]+$")) {
                     ui.dispose();
                     new UIAhorcado(palabra, true, null);
                 }else {

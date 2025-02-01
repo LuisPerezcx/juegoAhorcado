@@ -105,8 +105,13 @@ class ControllerBtns implements ActionListener{
         if(e == ui.btnCrear){
             System.out.println("crear juego!");
             String palabra = JOptionPane.showInputDialog("ingresa una palabra para jugar",null);
+            int maximoLetras = 15;
             if(palabra != null && !palabra.isEmpty()){
-                if (palabra.matches("[A-Za-z0-9¡¿?.,;:'\"()\\s]*")) {
+                if (palabra.split("\\s+").length > 1) {
+                    JOptionPane.showMessageDialog(null, "Solo puedes ingresar una palabra.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else if (palabra.length() > maximoLetras) {
+                    JOptionPane.showMessageDialog(null,"La palabra no puede tener más de " + maximoLetras + " caracteres.", "Error", JOptionPane.ERROR_MESSAGE);
+                }else if (palabra.matches("[A-Za-z0-9¡¿?.,;:'\"()\\s]*")) {
                     ui.dispose();
                     new UIAhorcado(palabra, true, null);
                 }else {
@@ -117,10 +122,15 @@ class ControllerBtns implements ActionListener{
             }
         } else if(e == ui.btnUnirse){
             String ipAdress = JOptionPane.showInputDialog("Ingresa la ip del host",null);
-            ipAdress = ipAdress.trim();
-            if(!ipAdress.isEmpty()){
+
+
+            if(ipAdress != null && !ipAdress.trim().isEmpty()){
+                ipAdress = ipAdress.trim();
                 ui.dispose();
                 new UIAhorcado(null,false, ipAdress);
+            }else {
+                System.out.println("El usuario cancelo.");
+
             }
             System.out.println("unirse a juego!");
         }

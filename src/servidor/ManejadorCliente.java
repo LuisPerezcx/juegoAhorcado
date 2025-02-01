@@ -10,6 +10,7 @@ public class ManejadorCliente implements Runnable {
     private PrintWriter salida;
     private Partida partida;
     private ServidorListener listener;
+    private static final int MIN_LETRAS = 3;
 
     public ManejadorCliente(Socket clienteSocket, String palabra, ServidorListener listener) {
         this.clienteSocket = clienteSocket;
@@ -33,9 +34,32 @@ public class ManejadorCliente implements Runnable {
                 enviarMensaje("Ingresa una letra:");
 
                 String letra = entrada.readLine();
+                System.out.println("Ingreso recibido: '" + letra + "'");
+
                 if (letra != null) {
-                    enviarMensaje("Letra: "+ letra);
-                    partida.intentarLetra(letra.charAt(0));
+                    System.out.println("valido que no sea null");
+                    if (letra.split("\\s+").length > 1) {
+                        System.out.println("entra en la validacion de que sea solo una palabra");
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Solo puede ingresar una palabra.",
+                                "ERROR",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
+                    }else if (!letra.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ]+")) {
+                        System.out.println("mensaje para caracteres especiales");
+                        // Validar que la entrada solo contenga letras (y caracteres acentuados y ñ)
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Solo se permiten letras. No se pueden ingresar números o símbolos.",
+                                "ERROR",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
+                    }else {
+                        enviarMensaje("Letra: "+ letra);
+                        partida.intentarLetra(letra.charAt(0));
+                    }
+
                 } else {
                     System.out.println("El cliente cerró la conexión");
 

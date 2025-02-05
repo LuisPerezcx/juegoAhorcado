@@ -194,21 +194,32 @@ public class UIAhorcado extends JFrame implements ServidorListener {
                 System.out.println(palabra);
 
             } else if (mensaje.contains("Juego terminado")) {
-                if(esHost){
-                    JOptionPane.showMessageDialog(null, mensaje + (servidorGano? " Ganaste!":" Perdiste :("), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
-                    if (servidorGano) {
-                        SoundPlayer.playSound("345299__scrampunk__okay.wav");  // Sonido de victoria
-                    } else {
-                        SoundPlayer.playSound("382310__mountain_man__game-over-arcade.wav");  // Sonido de derrota
-                    }
-                } else{
-                    JOptionPane.showMessageDialog(null, mensaje +(servidorGano? " Perdiste :(\n la palabra era:"+palabra: " Ganaste!"), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
-                    if (servidorGano) {
-                        SoundPlayer.playSound("345299__scrampunk__okay.wav");  // Sonido de victoria
-                    } else {
-                        SoundPlayer.playSound("382310__mountain_man__game-over-arcade.wav");  // Sonido de derrota
-                    }
+                if (esHost) {
+                    // Reproducir el sonido en un hilo separado
+                    new Thread(() -> {
+                        if (servidorGano) {
+                            SoundPlayer.playSound("345299__scrampunk__okay.wav");  // Sonido de victoria
+                        } else {
+                            SoundPlayer.playSound("382310__mountain_man__game-over-arcade.wav");  // Sonido de derrota
+                        }
+                    }).start();
+
+                    // Mostrar el mensaje después de iniciar el sonido
+                    JOptionPane.showMessageDialog(null, mensaje + (servidorGano ? " Ganaste!" : " Perdiste :("), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    // Reproducir el sonido en un hilo separado
+                    new Thread(() -> {
+                        if (servidorGano) {
+                            SoundPlayer.playSound("345299__scrampunk__okay.wav");  // Sonido de victoria
+                        } else {
+                            SoundPlayer.playSound("382310__mountain_man__game-over-arcade.wav");  // Sonido de derrota
+                        }
+                    }).start();
+
+                    // Mostrar el mensaje después de iniciar el sonido
+                    JOptionPane.showMessageDialog(null, mensaje + (servidorGano ? " Perdiste :(\n la palabra era:" + palabra : " Ganaste!"), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
                 }
+
 
                 int juegoNuevo = JOptionPane.showConfirmDialog(this, "Deseas jugar de nuevo?");
                 if (juegoNuevo == JOptionPane.YES_OPTION) {

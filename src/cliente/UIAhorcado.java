@@ -198,7 +198,6 @@ public class UIAhorcado extends JFrame implements ServidorListener {
                 int juegoNuevo = JOptionPane.showConfirmDialog(this, "Deseas jugar de nuevo?");
                 if (juegoNuevo == JOptionPane.YES_OPTION) {
                     if(esHost) servidorAhorcado.cerrarServidor();
-                    this.dispose();
                     new UIPrincipal();
                 } else if (juegoNuevo == JOptionPane.NO_OPTION){
                     System.exit(0);

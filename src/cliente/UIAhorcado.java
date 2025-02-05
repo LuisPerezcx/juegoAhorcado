@@ -188,17 +188,28 @@ public class UIAhorcado extends JFrame implements ServidorListener {
                     letraLabel.setText("Ultima letra intentada: " + ultimaLetra);
                 }
                 servidorGano = false;
-                SoundPlayer.playSound("345299__scrampunk__okay.wav");
             } else if(mensaje.contains("¡Lo siento! Has perdido. La palabra era:")){
                 servidorGano = true;
                 palabra=mensaje.substring(44);
                 System.out.println(palabra);
 
-                SoundPlayer.playSound("382310__mountain_man__game-over-arcade.wav");
             } else if (mensaje.contains("Juego terminado")) {
                 if(esHost){
                     JOptionPane.showMessageDialog(null, mensaje + (servidorGano? " Ganaste!":" Perdiste :("), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
-                } else JOptionPane.showMessageDialog(null, mensaje +(servidorGano? " Perdiste :(\n la palabra era:"+palabra: " Ganaste!"), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
+                    if (servidorGano) {
+                        SoundPlayer.playSound("345299__scrampunk__okay.wav");  // Sonido de victoria
+                    } else {
+                        SoundPlayer.playSound("382310__mountain_man__game-over-arcade.wav");  // Sonido de derrota
+                    }
+                } else{
+                    JOptionPane.showMessageDialog(null, mensaje +(servidorGano? " Perdiste :(\n la palabra era:"+palabra: " Ganaste!"), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
+                    if (servidorGano) {
+                        SoundPlayer.playSound("345299__scrampunk__okay.wav");  // Sonido de victoria
+                    } else {
+                        SoundPlayer.playSound("382310__mountain_man__game-over-arcade.wav");  // Sonido de derrota
+                    }
+                }
+
                 int juegoNuevo = JOptionPane.showConfirmDialog(this, "Deseas jugar de nuevo?");
                 if (juegoNuevo == JOptionPane.YES_OPTION) {
                     if(esHost) servidorAhorcado.cerrarServidor();

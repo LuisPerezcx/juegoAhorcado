@@ -69,16 +69,11 @@ public class ManejadorCliente implements Runnable {
         }catch (IOException e) {
             enviarMensaje("❌ Error en el cliente: " + e.getMessage());
             e.printStackTrace();
-        }finally {
-            cerrarConexion();
         }
     }
 
     private void enviarMensaje(String mensaje) {
         salida.println(mensaje); // Enviar al cliente
-        if (salida !=null){
-            salida.println(mensaje);
-        }
         if (listener != null) {
             listener.onMensajeRecibido(mensaje); // Notificar al servidor
         }

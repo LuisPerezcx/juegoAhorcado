@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class ServidorAhorcado {
-    public static ExecutorService pool = Executors.newFixedThreadPool(2);
+    public static ExecutorService pool = Executors.newFixedThreadPool(1);
     private static final int PUERTO = 5000;
     private static boolean ejecutando = false;
     private ServidorListener listener;

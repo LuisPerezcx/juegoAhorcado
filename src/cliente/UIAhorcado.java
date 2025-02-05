@@ -2,6 +2,7 @@ package cliente;
 
 import servidor.ServidorAhorcado;
 import servidor.ServidorListener;
+import soundPlayer.SoundPlayer;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -187,10 +188,13 @@ public class UIAhorcado extends JFrame implements ServidorListener {
                     letraLabel.setText("Ultima letra intentada: " + ultimaLetra);
                 }
                 servidorGano = false;
+                SoundPlayer.playSound("345299__scrampunk__okay.wav");
             } else if(mensaje.contains("¡Lo siento! Has perdido. La palabra era:")){
                 servidorGano = true;
                 palabra=mensaje.substring(44);
                 System.out.println(palabra);
+
+                SoundPlayer.playSound("382310__mountain_man__game-over-arcade.wav");
             } else if (mensaje.contains("Juego terminado")) {
                 if(esHost){
                     JOptionPane.showMessageDialog(null, mensaje + (servidorGano? " Ganaste!":" Perdiste :("), "Juego terminado", JOptionPane.INFORMATION_MESSAGE);
